@@ -1,15 +1,18 @@
 import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+import joblib
 
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.svm import SVC
 from sklearn.metrics import (
     accuracy_score,
     classification_report,
-    confusion_matrix
+    confusion_matrix,
+    f1_score
 )
-
-import seaborn as sns
-import matplotlib.pyplot as plt
 
 # ==================================
 # 1. CARREGAR DATASET
@@ -20,9 +23,6 @@ df = pd.read_csv("brasileirao.csv")
 print("Shape:")
 print(df.shape)
 
-print("\nColunas:")
-print(df.columns.tolist())
-
 print("\nPrimeiras linhas:")
 print(df.head())
 
@@ -30,15 +30,41 @@ print(df.head())
 # 2. CRIAR VARIÁVEL ALVO
 # ==================================
 
-# Rebaixados = posições 17,18,19,20
+def classificar_desempenho(posicao):
+    if posicao <= 4:
+        return "Elite"
+    elif posicao <= 8:
+        return "Competitivo"
+    elif posicao <= 16:
+        return "Intermediario"
+    else:
+        return "Rebaixado"
 
-df["rebaixado"] = (df["place"] >= 17).astype(int)
+df["categoria"] = df["place"].apply(classificar_desempenho)
 
-print("\nQuantidade de rebaixados:")
-print(df["rebaixado"].value_counts())
+print("\nDistribuição das categorias:")
+print(df["categoria"].value_counts())
 
 # ==================================
-# 3. SELECIONAR FEATURES
+# 3. GRÁFICO DAS CATEGORIAS
+# ==================================
+
+plt.figure(figsize=(8, 5))
+
+sns.countplot(
+    data=df,
+    x="categoria",
+    order=df["categoria"].value_counts().index
+)
+
+plt.title("Distribuição das Categorias")
+plt.xlabel("Categoria")
+plt.ylabel("Quantidade")
+
+plt.show()
+
+# ==================================
+# 4. FEATURES E TARGET
 # ==================================
 
 X = df[
@@ -53,59 +79,76 @@ X = df[
     ]
 ]
 
-y = df["rebaixado"]
+y = df["categoria"]
 
 # ==================================
-# 4. DIVISÃO TREINO / TESTE
+# 5. DIVISÃO TREINO / TESTE
 # ==================================
 
 X_train, X_test, y_train, y_test = train_test_split(
     X,
     y,
     test_size=0.2,
-    random_state=42
+    random_state=42,
+    stratify=y
 )
 
 # ==================================
-# 5. TREINAR MODELO
+# 6. NORMALIZAÇÃO PARA MLP
 # ==================================
 
-modelo = DecisionTreeClassifier(
+scaler = StandardScaler()
+
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+# ==================================
+# 7. MODELO 1 - ÁRVORE DE DECISÃO
+# ==================================
+
+tree_model = DecisionTreeClassifier(
+    max_depth=5,
     random_state=42
 )
 
-modelo.fit(X_train, y_train)
+tree_model.fit(X_train, y_train)
+
+y_pred_tree = tree_model.predict(X_test)
 
 # ==================================
-# 6. PREVISÕES
+# 8. RESULTADOS - ÁRVORE
 # ==================================
 
-y_pred = modelo.predict(X_test)
+acc_tree = accuracy_score(
+    y_test,
+    y_pred_tree
+)
 
-# ==================================
-# 7. MÉTRICAS
-# ==================================
+f1_tree = f1_score(
+    y_test,
+    y_pred_tree,
+    average="weighted"
+)
 
-acc = accuracy_score(y_test, y_pred)
+print("\n==============================")
+print("ÁRVORE DE DECISÃO")
+print("==============================")
 
-print("\nAccuracy:")
-print(acc)
+print(f"\nAccuracy: {acc_tree:.4f}")
+print(f"F1-Score: {f1_tree:.4f}")
 
 print("\nClassification Report:")
-print(classification_report(y_test, y_pred))
+print(classification_report(y_test, y_pred_tree))
 
-print("\nConfusion Matrix:")
-cm = confusion_matrix(y_test, y_pred)
-print(cm)
+cm_tree = confusion_matrix(
+    y_test,
+    y_pred_tree
+)
 
-# ==================================
-# 8. MATRIZ DE CONFUSÃO
-# ==================================
-
-plt.figure(figsize=(6,4))
+plt.figure(figsize=(7, 5))
 
 sns.heatmap(
-    cm,
+    cm_tree,
     annot=True,
     fmt="d",
     cmap="Blues"
@@ -123,7 +166,7 @@ plt.show()
 
 importancias = pd.DataFrame({
     "Variavel": X.columns,
-    "Importancia": modelo.feature_importances_
+    "Importancia": tree_model.feature_importances_
 })
 
 importancias = importancias.sort_values(
@@ -131,10 +174,10 @@ importancias = importancias.sort_values(
     ascending=False
 )
 
-print("\nImportância das variáveis:")
+print("\nImportância das Variáveis:")
 print(importancias)
 
-plt.figure(figsize=(8,4))
+plt.figure(figsize=(8, 5))
 
 sns.barplot(
     data=importancias,
@@ -142,47 +185,173 @@ sns.barplot(
     y="Variavel"
 )
 
-#times q mais cairam
-rebaixamentos = df[df["place"] >= 17]["team"].value_counts()
-print("Qual time mais caiu?", rebaixamentos)
-
-#times q mais ficaram no g4
-g4 = df[df["place"] <= 4]["team"].value_counts()
-print("Time g4",g4)
-
-#rendimento de times especificos
-palmeiras = df[df["team"] == "Palmeiras"].sort_values("season")
-print(palmeiras[["season", "place"]])
-
 plt.title("Importância das Variáveis")
 plt.show()
 
-# evolucao de posicao por time
-import matplotlib.pyplot as plt
+# ==================================
+# 10. MODELO 2 - SVM
+# ==================================
 
-team_name = "Vasco"
+svm_model = SVC(
+    kernel="rbf",
+    C=1.0,
+    gamma="scale",
+    random_state=42
+)
 
-team_df = df[df["team"] == team_name].sort_values("season")
+svm_model.fit(
+    X_train_scaled,
+    y_train
+)
 
-plt.plot(team_df["season"], team_df["place"], marker="o")
+y_pred_svm = svm_model.predict(
+    X_test_scaled
+)
 
-plt.gca().invert_yaxis()  # posição 1 no topo
-plt.title(f"Evolução do {team_name}")
-plt.xlabel("Ano")
-plt.ylabel("Posição")
+# ==================================
+# 11. RESULTADOS - SVM
+# ==================================
+
+acc_svm = accuracy_score(
+    y_test,
+    y_pred_svm
+)
+
+f1_svm = f1_score(
+    y_test,
+    y_pred_svm,
+    average="weighted"
+)
+
+print("\n==============================")
+print("SVM")
+print("==============================")
+
+print(f"\nAccuracy: {acc_svm:.4f}")
+print(f"F1-Score: {f1_svm:.4f}")
+
+print("\nClassification Report:")
+print(classification_report(y_test, y_pred_svm))
+
+cm_svm = confusion_matrix(
+    y_test,
+    y_pred_svm
+)
+
+plt.figure(figsize=(7, 5))
+
+sns.heatmap(
+    cm_svm,
+    annot=True,
+    fmt="d",
+    cmap="Greens"
+)
+
+plt.title("Matriz de Confusão - SVM")
+plt.xlabel("Previsto")
+plt.ylabel("Real")
+
 plt.show()
 
-#ranking geral dos q mais cairam
-top_rebaixados = df[df["place"] >= 17]["team"].value_counts()
+# ==================================
+# 11. COMPARAÇÃO DOS MODELOS
+# ==================================
 
-print(top_rebaixados)
+comparacao = pd.DataFrame({
+    "Modelo": [
+        "Árvore de Decisão",
+        "SVM"
+    ],
+    "Accuracy": [
+        acc_tree,
+        acc_svm
+    ],
+    "F1-Score": [
+        f1_tree,
+        f1_svm
+    ]
+})
 
-#times mais consistentes no campeonato
-consistencia = df.groupby("team")["place"].std().sort_values()
+print("\nComparação dos Modelos:")
+print(comparacao)
 
-print(consistencia.head(10))
+# Accuracy
 
-#media de posicao geral
-media_posicao = df.groupby("team")["place"].mean().sort_values()
+plt.figure(figsize=(8, 5))
 
-print(media_posicao)
+sns.barplot(
+    data=comparacao,
+    x="Modelo",
+    y="Accuracy"
+)
+
+plt.title("Comparação de Accuracy")
+plt.ylim(0, 1)
+
+plt.show()
+
+# F1 Score
+
+plt.figure(figsize=(8, 5))
+
+sns.barplot(
+    data=comparacao,
+    x="Modelo",
+    y="F1-Score"
+)
+
+plt.title("Comparação de F1-Score")
+plt.ylim(0, 1)
+
+plt.show()
+
+# ==================================
+# 12. HEATMAP DE CORRELAÇÃO
+# ==================================
+
+corr = df[
+    [
+        "place",
+        "points",
+        "won",
+        "draw",
+        "loss",
+        "goals",
+        "goals_taken",
+        "goals_diff"
+    ]
+].corr()
+
+plt.figure(figsize=(10, 8))
+
+sns.heatmap(
+    corr,
+    annot=True,
+    cmap="coolwarm",
+    fmt=".2f"
+)
+
+plt.title("Correlação Entre Variáveis")
+
+plt.show()
+
+# ==================================
+# 13. SALVAR MODELOS
+# ==================================
+
+joblib.dump(
+    tree_model,
+    "modelo_arvore.pkl"
+)
+
+joblib.dump(
+    svm_model,
+    "modelo_svn.pkl"
+)
+
+joblib.dump(
+    scaler,
+    "scaler.pkl"
+)
+
+print("\nModelos salvos com sucesso!")
