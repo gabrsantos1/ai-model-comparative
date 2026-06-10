@@ -8,6 +8,15 @@
 - Pedro Paulo Barbosa Arantes - RA: 25362249-2
 - Lucas de Freitas Bovo - RA: 25362304-2
 
+### Modelos Treinados
+Após a execução do projeto são gerados os seguintes arquivos:
+
+- modelo_arvore.pkl
+- modelo_svm.pkl
+- scaler.pkl
+
+Esses arquivos permitem reutilizar os modelos treinados sem a necessidade de realizar novamente o treinamento.
+
 ## Análise de Desempenho das Equipes no Brasileirão e Classificação em Categorias de Desempenho (2003-2024)
 
 Utilizamos estatísticas da temporada (pontos, vitórias, derrotas, gols marcados e saldo de gols) e a partir dessas métricas, os modelos aprenderam padrões históricos para classificar cada equipe em uma das quatro categorias definidas: Elite, Competitivo, Intermediário ou Rebaixado. E após a classificação comparamos o desempenho da Árvore de Decisão e do SVM utilizando Accuracy, F1-Score e Matriz de Confusão.
@@ -21,15 +30,15 @@ Sabendo dessas informações, utilizamos o método da Árvore de Decisão e a SV
 ### Avaliação dos Modelos e Comparação dos Modelos
 Os modelos foram avaliados utilizando Accuracy, F1-Score, Classification Report e Matrizes de Confusão.
 
-![Matriz - SVM](https://prnt.sc/JsTxPl0sTfq2)
+![Matriz - SVM](munif/img/matriz-svm.png)
 
-![Matriz - Árvore de Decisão](https://prnt.sc/Z4zyg6v7KMOB)
+![Matriz - Árvore de Decisão](munif/img/matriz-arvoredecisao.png)
 
 As matrizes de confusão nos informam que os dois modelos foram bem em suas classificações, porém o SVM teve um desempenho um pouco superior a Árvore de Decisão.
 
-![Accuracy -Comparativo](https://prnt.sc/zYwuAL49iSYu)
+![Accuracy - Comparativo](munif/img/acc-comp.png)
 
-![F1 Score -Comparativo](https://prnt.sc/MneKAhxcPwYn)
+![F1 Score - Comparativo](munif/img/f1-comp.png)
 
 É possível perceber que a diferença no rendimento da Árvore para o SVM foi de 2,22% e a diferença no rendimento no F1-Score foi de 1,69%
 
@@ -38,6 +47,8 @@ Os resultados demonstraram que as estatísticas de desempenho das equipes possue
 Como dito, o modelo SVM apresentou o melhor desempenho, alcançando Accuracy de 83,33% e F1-Score de 82,36%, superando a Árvore de Decisão nas duas métricas avaliadas. Isso indica que o SVM foi mais eficiente na generalização dos padrões presentes no conjunto de dados.
 
 A análise também mostrou que os atributos mais importantes para a classificação das equipes foram a quantidade de pontos conquistados, o saldo de gols e o número de derrotas, fatores diretamente relacionados ao desempenho esportivo dos clubes.
+
+![Importância das Variaveis](munif/img/var-imp.png)
 
 Com isso, concluimos que técnicas de Inteligência Artificial podem ser utilizadas para classificar equipes em categorias de desempenho a partir de estatísticas históricas do Campeonato Brasileiro.
 
