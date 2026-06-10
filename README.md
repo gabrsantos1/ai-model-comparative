@@ -9,16 +9,37 @@
 - Lucas de Freitas Bovo - RA: 25362304-2
 
 ## Análise de Desempenho das Equipes no Brasileirão e Classificação em Categorias de Desempenho (2003-2024)
-  
+
 Utilizamos estatísticas da temporada (pontos, vitórias, derrotas, gols marcados e saldo de gols) e a partir dessas métricas, os modelos aprenderam padrões históricos para classificar cada equipe em uma das quatro categorias definidas: Elite, Competitivo, Intermediário ou Rebaixado. E após a classificação comparamos o desempenho da Árvore de Decisão e do SVM utilizando Accuracy, F1-Score e Matriz de Confusão.
+
+A hipótese deste trabalho é que as estatísticas de desempenho de uma equipe durante uma temporada do Campeonato Brasileiro, como pontos conquistados, vitórias, derrotas e saldo de gols, são suficientes para identificar padrões capazes de classificar corretamente as equipes em categorias de desempenho. Além disso, espera-se que o modelo SVM apresente desempenho superior ao da Árvore de Decisão devido à sua maior capacidade de generalização em problemas de classificação.
 
 O dataset apresenta registros históricos oficiais do Campeonato Brasileiro Série A (Brasileirão), cobrindo todas as temporadas desde a adoção do sistema de pontos corridos em 2003 até 2024. Ele apresenta diversas informações sobre as equipes participantes do campeonato trazendo contexto de gols, pontos, partidas jogadas, colocação, dentre outros. 
 
-Sabendo dessas informações, utilizamos o método da Árvore de Decisão e a SVM para classificar e, posteriormente, comparar os resultados.
+Sabendo dessas informações, utilizamos o método da Árvore de Decisão e a SVM para classificar e, posteriormente, comparar os resultados. A Árvore de Decisão foi utilizada como método da Parte 1. O algoritmo cria regras de decisão a partir dos dados de treinamento, permitindo classificar as equipes nas categorias definidas. O SVM foi utilizado como método da Parte 2. O algoritmo busca encontrar fronteiras de decisão que separem da melhor forma possível as diferentes categorias de desempenho das equipes.
 
-## avaliacao dos modelos com graficos - svm melhor
-## comparacao de resultados - svm pouco mlehor
-## conclusao
+### Avaliação dos Modelos e Comparação dos Modelos
+Os modelos foram avaliados utilizando Accuracy, F1-Score, Classification Report e Matrizes de Confusão.
+
+![Matriz - SVM](https://prnt.sc/JsTxPl0sTfq2)
+
+![Matriz - Árvore de Decisão](https://prnt.sc/Z4zyg6v7KMOB)
+
+As matrizes de confusão nos informam que os dois modelos foram bem em suas classificações, porém o SVM teve um desempenho um pouco superior a Árvore de Decisão.
+
+![Accuracy -Comparativo](https://prnt.sc/zYwuAL49iSYu)
+
+![F1 Score -Comparativo](https://prnt.sc/MneKAhxcPwYn)
+
+É possível perceber que a diferença no rendimento da Árvore para o SVM foi de 2,22% e a diferença no rendimento no F1-Score foi de 1,69%
+
+Os resultados demonstraram que as estatísticas de desempenho das equipes possuem forte relação com sua classificação final no campeonato. Tanto a Árvore de Decisão quanto o SVM conseguiram identificar padrões relevantes nos dados históricos do Brasileirão.
+
+Como dito, o modelo SVM apresentou o melhor desempenho, alcançando Accuracy de 83,33% e F1-Score de 82,36%, superando a Árvore de Decisão nas duas métricas avaliadas. Isso indica que o SVM foi mais eficiente na generalização dos padrões presentes no conjunto de dados.
+
+A análise também mostrou que os atributos mais importantes para a classificação das equipes foram a quantidade de pontos conquistados, o saldo de gols e o número de derrotas, fatores diretamente relacionados ao desempenho esportivo dos clubes.
+
+Com isso, concluimos que técnicas de Inteligência Artificial podem ser utilizadas para classificar equipes em categorias de desempenho a partir de estatísticas históricas do Campeonato Brasileiro.
 
 ## Dataset
 
@@ -61,5 +82,29 @@ Além disso, foi utilizada a estratégia de amostragem estratificada (stratify=y
 
 Ao final da divisão, aproximadamente 360 registros foram utilizados para treinamento dos modelos e 90 registros para avaliação de desempenho.
 
-## É possível prever se uma equipe será rebaixada utilizando estatísticas de desempenho ao longo do campeonato?
-## Árvore de Decisão // Rede Neural MLP
+# Como Executar o Projeto
+
+Clone o repositório
+
+```bash
+  git clone https://github.com/gabrsantos1/ai-model-comparative.git
+```
+
+Entre na pasta do projeto
+
+```bash
+  cd ai-model-comparative
+  cd munif
+```
+
+Instale as dependências
+
+```bash
+  pip install -r requirements.txt
+```
+
+Execute o projeto
+
+```bash
+  python dataset.py
+```

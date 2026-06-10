@@ -346,7 +346,7 @@ joblib.dump(
 
 joblib.dump(
     svm_model,
-    "modelo_svn.pkl"
+    "modelo_svm.pkl"
 )
 
 joblib.dump(
